@@ -1,0 +1,26 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Geisternetz Karte</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/></head>
+<body>
+  <h1>Geisternetze auf der Karte</h1>
+  <div id="map" style="height:60vh; max-width:1100px; margin:0 auto"></div>
+  <p style="text-align:center"><a class="btn" href="/">Zurück</a></p>
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script>
+    const map = L.map('map').setView([54.0, 10.0], 6);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18 }).addTo(map);
+    fetch('/api/ghostnets?status=Gemeldet').then(r => r.json()).then(data => {
+      data.forEach(n => {
+        if (n.latitude && n.longitude) {
+          const marker = L.marker([n.latitude, n.longitude]).addTo(map);
+          let popup = 'ID: ' + n.id + '<br/>Größe: ' + n.sizeEstimate + '<br/>Status: ' + n.status;
+          if (n.reporter) popup += '<br/>Meldung: ' + n.reporter.name + (n.reporter.phone ? ' (' + n.reporter.phone + ')' : '');
+          if (n.rescuer) popup += '<br/>Bergende Person: ' + n.rescuer.name + (n.rescuer.phone ? ' (' + n.rescuer.phone + ')' : '');
+          marker.bindPopup(popup);
+        }
+      });
+    });
+  </script>
+</body>
+</html>

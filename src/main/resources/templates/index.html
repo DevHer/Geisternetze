@@ -1,0 +1,216 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Geisternetz Verwaltung - Sea Shepherd</title>
+  <style>
+    :root{ --accent:#0b84ff; --card-bg:#fff; --muted:#666; --gap:16px; --danger:#a00; }
+    body { font-family: Arial, sans-serif; margin: 16px; background:#f6f7fb; color:#222; }
+    header { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom: 16px; flex-wrap:wrap; }
+    .brand { display:flex; flex-direction:column; }
+    .team-name { font-family: 'Georgia', serif; font-size: 24px; font-weight:700; }
+    .org { font-size:12px; color:var(--muted); }
+    .stats { text-align:right; font-size:14px; }
+    .stat-badge { display:inline-block; background:var(--accent); color:#fff; padding:6px 10px; border-radius:20px; margin-left:8px; }
+    .container { display:flex; flex-direction:column; gap:var(--gap); max-width:1100px; margin:0 auto; }
+    section { background:var(--card-bg); padding:14px; border-radius:8px; box-shadow:0 2px 6px rgba(20,30,50,0.06); }
+    .btn { display:inline-block; background:var(--accent); color:#fff; border:none; padding:8px 12px; border-radius:6px; text-decoration:none; font-size:14px; cursor:pointer; }
+    .btn-outline { background:#e9eefb; color:var(--accent); border:1px solid #d7e7ff; padding:8px 12px; border-radius:6px; text-decoration:none; }
+    .btn-danger { background:var(--danger); color:#fff; border:none; padding:8px 12px; border-radius:6px; cursor:pointer; }
+    table { border-collapse: collapse; width: 100%; margin-top: 8px; }
+    th, td { border-bottom: 1px solid #eee; padding: 8px; text-align: left; font-size:14px; vertical-align:middle; }
+    .action-form { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+    .action-form input[type="text"]{ padding:8px; border-radius:6px; border:1px solid #ccc; font-size:14px; }
+    .small { font-size:13px; color:var(--muted); }
+    @media (max-width:900px){
+      header{flex-direction:column; align-items:flex-start;}
+      .stats{ text-align:left; margin-top:8px;}
+    }
+    @media (max-width:600px){
+      table, th, td{ font-size:13px }
+      .action-form { flex-direction:column; align-items:stretch; }
+      .action-form input[type="text"]{ width:100%; box-sizing:border-box; }
+      .stats { font-size:13px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="team-name">Sea Shepherd</div>
+      <div class="org">Non-Profit-Organisation</div>
+    </div>
+    <div class="stats" aria-live="polite">
+      <div><strong>Diesen Monat</strong></div>
+      <div class="small">Geborgene Geisternetze: <span class="stat-badge"><span class="num" th:text="${recoveredThisMonth}">0</span></span></div>
+      <div class="small">Gemeldete Geisternetze: <span class="stat-badge"><span class="num" th:text="${reportedThisMonth}">0</span></span></div>
+      <div style="margin-top:8px;"><a class="btn-outline" href="/stats">Historische Monatsdaten</a></div>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <section>
+      <h3>Gemeldete Geisternetze</h3>
+
+      <div style="margin-bottom:10px;">
+        <a class="btn" href="/report">Neues Geisternetz melden</a>
+        <a class="btn" href="/map" style="margin-left:8px">Karte anzeigen</a>
+      </div>
+
+      <div style="overflow:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th><th>Lat</th><th>Lon</th><th>Größe</th><th>Meldender</th><th>Aktion</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="n : ${reported}">
+              <td th:text="${n.id}">1</td>
+              <td th:text="${n.latitude}">54.0</td>
+              <td th:text="${n.longitude}">10.0</td>
+              <td th:text="${n.sizeEstimate}">klein</td>
+              <td th:text="${n.reporter != null ? n.reporter.name : 'anonym'}">anonym</td>
+              <td>
+                <div class="action-form">
+                  <form th:action="@{'/claim/' + ${n.id}}" method="post" class="action-form" style="margin:0;">
+                    <input type="text" name="rescuerName" placeholder="Dein Name" required/>
+                    <input type="text" name="rescuerPhone" placeholder="Telefon" required/>
+                    <button class="btn" type="submit">Bergen</button>
+                  </form>
+
+                  <!-- Verschollen-Button: zeigt zuerst Warnung, dann fragt Name+Telefon, sendet POST -->
+                  <button class="btn-danger" th:onclick="|askAndMarkMissing(${n.id})|">Als verschollen melden</button>
+                </div>
+              </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(reported)}">
+              <td colspan="6" class="small">Keine gemeldeten Geisternetze vorhanden.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section>
+      <h3>Bergung bevorstehend</h3>
+
+      <div style="overflow:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th><th>Lat</th><th>Lon</th><th>Größe</th><th>Bergende Person</th><th>Aktion</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="n : ${toBeRescued}">
+              <td th:text="${n.id}">1</td>
+              <td th:text="${n.latitude}">54.0</td>
+              <td th:text="${n.longitude}">10.0</td>
+              <td th:text="${n.sizeEstimate}">mittel</td>
+              <td th:text="${n.rescuer != null ? n.rescuer.name : '-'}">-</td>
+              <td>
+                <div class="action-form">
+                  <form th:action="@{'/recover/' + ${n.id}}" method="post" style="margin:0; display:flex; gap:8px; align-items:center;">
+                <!-- Wenn keine rescuer zugeordnet ist: Name eingeben -->
+                    <input type="text" name="rescuerName" th:if="${n.rescuer == null}" placeholder="Dein Name" required/>
+
+                <!-- Wenn bereits ein rescuer zugeordnet ist: sichtbaren Text anzeigen (nicht editierbar)
+                      und trotzdem den Namen als hidden input mitsenden, damit der Server weiter rescuerName erhält -->
+                    <span class="rescuer-name" th:if="${n.rescuer != null}" th:text="${n.rescuer.name}">Rescuer Name</span>
+                    <input type="hidden" name="rescuerName" th:if="${n.rescuer != null}" th:value="${n.rescuer.name}" />
+
+                <!-- Telefonnummer immer erforderlich (zur Bestätigung) -->
+                    <input type="text" name="rescuerPhone" placeholder="Telefon (zur Bestätigung)" required/>
+                    <button class="btn" type="submit">Als geborgen melden</button>
+                  </form>
+
+                  <button class="btn-danger" th:onclick="|askAndMarkMissing(${n.id})|">Als verschollen melden</button>
+                </div>
+              </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(toBeRescued)}">
+              <td colspan="6" class="small">Keine anstehenden Bergungen.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section>
+      <h3>Archiv (geborgen / verschollen — letzte 30 Tage)</h3>
+
+      <div style="overflow:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th><th>Lat</th><th>Lon</th><th>Größe</th><th>Status</th><th>Meldender</th><th>Geborgen durch</th><th>Datum</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="a : ${archive}">
+              <td th:text="${a.id}">1</td>
+              <td th:text="${a.latitude}">54.0</td>
+              <td th:text="${a.longitude}">10.0</td>
+              <td th:text="${a.sizeEstimate}">klein</td>
+              <td th:text="${a.status}">Geborgen</td>
+              <td th:text="${a.reporter != null ? a.reporter.name : 'anonym'}">anonym</td>
+              <td th:text="${a.rescuer != null ? a.rescuer.name : '-'}">-</td>
+              <td th:text="${#temporals.format(a.createdAt,'dd.MM.yyyy HH:mm')} + ' Uhr'">12.10.2025 14:05 Uhr</td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(archive)}">
+              <td colspan="8" class="small">Kein Archiv-Eintrag in den letzten 30 Tagen.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    async function askAndMarkMissing(id) {
+      // Warnung / Bestätigung
+      if (!confirm("Sie sind dabei das Geisternetz als verschollen zu melden, möchten Sie fortfahren?")) {
+        return;
+      }
+
+      // Name & Telefon einholen (nicht anonym erlaubt)
+      const name = prompt("Bitte geben Sie Ihren Namen ein (erforderlich):");
+      if (!name || name.trim() === "") {
+        alert("Name ist erforderlich. Die Verschollenmeldung wurde abgebrochen.");
+        return;
+      }
+      const phone = prompt("Bitte geben Sie Ihre Telefonnummer ein (erforderlich), z. B. +49-170-...:");
+      if (!phone || phone.trim() === "") {
+        alert("Telefonnummer ist erforderlich. Die Verschollenmeldung wurde abgebrochen.");
+        return;
+      }
+
+      // Anfrage senden (Form-URL-encoded)
+      const params = new URLSearchParams();
+      params.append("reporterName", name.trim());
+      params.append("reporterPhone", phone.trim());
+
+      try {
+        const resp = await fetch('/missing/' + id, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: params.toString()
+        });
+        if (resp.ok) {
+          // Seite neu laden, damit Status/Listen sich aktualisieren
+          window.location.reload();
+        } else {
+          const txt = await resp.text();
+          alert("Fehler beim Verschicken: " + (txt || resp.statusText));
+        }
+      } catch (err) {
+        alert("Fehler: " + err);
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,49 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Geisternetz melden</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin:16px; background:#f6f7fb; color:#222; }
+    .card { max-width:720px; margin:0 auto; background:#fff; padding:16px; border-radius:8px; box-shadow:0 2px 6px rgba(20,30,50,0.06); }
+    form { display:flex; flex-direction:column; gap:12px; }
+    label { font-size:14px; color:#333; }
+    input[type="text"], input[type="number"], select { width:100%; min-width: 320px; padding:10px 12px; border:1px solid #ccc; border-radius:6px; box-sizing:border-box; font-size:14px;}
+    .actions { display:flex; gap:8px; margin-top:8px; }
+    .btn { background:#0b84ff; color:#fff; border:none; padding:8px 12px; border-radius:6px; cursor:pointer; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Geisternetz melden</h1>
+    <form th:action="@{/report}" method="post">
+      <div>
+        <label for="latitude">Latitude</label>
+        <input id="latitude" name="latitude" placeholder="z.B. 54.320" required/>
+      </div>
+      <div>
+        <label for="longitude">Longitude</label>
+        <input id="longitude" name="longitude" placeholder="z.B. 10.123" required/>
+      </div>
+      <div>
+        <label for="sizeEstimate">Größenschätzung</label>
+        <input id="sizeEstimate" name="sizeEstimate" placeholder="klein / mittel / groß"/>
+      </div>
+      <div>
+        <label for="reporterName">Meldender (optional)</label>
+        <input id="reporterName" name="reporterName" placeholder="Vorname Name"/>
+      </div>
+      <div>
+        <label for="reporterPhone">Telefon (optional)</label>
+        <input id="reporterPhone" name="reporterPhone" placeholder="+49-170-..." />
+      </div>
+      <div class="actions">
+        <button class="btn" type="submit">Melden</button>
+        <a class="btn" href="/" style="background:#e9eefb;color:#0b84ff;text-decoration:none;padding:8px 12px;border-radius:6px;">Abbrechen</a>
+      </div>
+      <div class="error" th:if="${param.error}" style="color:#a00">Fehler: <span th:text="${param.error}">...</span></div>
+    </form>
+  </div>
+</body>
+</html>

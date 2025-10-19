@@ -1,0 +1,28 @@
+# Build / artifacts
+target/
+*.class
+*.jar
+*.war
+
+# Environment / secrets
+.env
+.env.local
+.env.*.local
+
+# OS / IDE
+.DS_Store
+__MACOSX/
+.idea/
+.vscode/
+*.iml
+
+# Logs
+*.log
+
+# Node
+node_modules/
+
+# Other
+*.keystore
+*.pem
+id_rsa*

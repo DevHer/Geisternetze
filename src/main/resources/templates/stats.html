@@ -1,0 +1,18 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><title>Monatsstatistiken</title></head>
+<body>
+  <h1>Historische Monatsdaten</h1>
+  <p><a href="/">Zurück</a></p>
+  <table border="1">
+    <thead><tr><th>Monat (YYYY-MM)</th><th>Gemeldet</th><th>Geborgen</th></tr></thead>
+    <tbody>
+      <tr th:each="m : ${months}">
+        <td th:text="${m.yearMonth}">2025-10</td>
+        <td th:text="${m.reportedCount}">3</td>
+        <td th:text="${m.recoveredCount}">1</td>
+      </tr>
+    </tbody>
+  </table>
+</body>
+</html>
