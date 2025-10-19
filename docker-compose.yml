@@ -1,20 +1,18 @@
-version: "3.8"
-
 services:
   db:
     image: mysql:8.0
     container_name: geisternetze-db
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: "change_root"
-      MYSQL_DATABASE: "geisternetze"
-      MYSQL_USER: "geisternetze"
-      MYSQL_PASSWORD: "change_me"
+      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD:-change_root}"
+      MYSQL_DATABASE: "${MYSQL_DATABASE:-geisternetze}"
+      MYSQL_USER: "${MYSQL_USER:-geisternetze}"
+      MYSQL_PASSWORD: "${MYSQL_PASSWORD:-change_me}"
     ports:
       - "3306:3306"
     command: --default-authentication-plugin=mysql_native_password
     healthcheck:
-      test: ["CMD", "mysqladmin" ,"ping","-h","127.0.0.1", "-u","root","-pchange_root"]
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u${MYSQL_USER} -p${MYSQL_PASSWORD} || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
